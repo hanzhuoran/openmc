@@ -401,9 +401,8 @@ class ZernikeFilter(ExpansionFilter):
     @ExpansionFilter.order.setter
     def order(self, order):
         ExpansionFilter.order.__set__(self, order)
-        self.bins = ['Z{},{}'.format(n, m)
-                     for n in range(order + 1)
-                     for m in range(-n, n + 1, 2)]
+        self.bins = ['Z{}'.format(n)
+                     for n in range(order + 1)]
 
     @property
     def x(self):

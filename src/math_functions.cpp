@@ -510,83 +510,168 @@ void calc_rn_c(int n, const double uvw[3], double rn[]){
 }
 
 
-void calc_zn_c(int n, double rho, double phi, double zn[]) {
-  // ===========================================================================
-  // Determine vector of sin(n*phi) and cos(n*phi). This takes advantage of the
-  // following recurrence relations so that only a single sin/cos have to be
-  // evaluated (http://mathworld.wolfram.com/Multiple-AngleFormulas.html)
-  //
-  // sin(nx) = 2 cos(x) sin((n-1)x) - sin((n-2)x)
-  // cos(nx) = 2 cos(x) cos((n-1)x) - cos((n-2)x)
+// void calc_zn_c(int n, double rho, double phi, double zn[]) {
+//   // ===========================================================================
+//   // Determine vector of sin(n*phi) and cos(n*phi). This takes advantage of the
+//   // following recurrence relations so that only a single sin/cos have to be
+//   // evaluated (http://mathworld.wolfram.com/Multiple-AngleFormulas.html)
+//   //
+//   // sin(nx) = 2 cos(x) sin((n-1)x) - sin((n-2)x)
+//   // cos(nx) = 2 cos(x) cos((n-1)x) - cos((n-2)x)
 
-  double sin_phi = std::sin(phi);
-  double cos_phi = std::cos(phi);
+//   double sin_phi = std::sin(phi);
+//   double cos_phi = std::cos(phi);
 
-  double sin_phi_vec[n + 1]; // Sin[n * phi]
-  double cos_phi_vec[n + 1]; // Cos[n * phi]
-  sin_phi_vec[0] = 1.0;
-  cos_phi_vec[0] = 1.0;
-  sin_phi_vec[1] = 2.0 * cos_phi;
-  cos_phi_vec[1] = cos_phi;
+//   double sin_phi_vec[n + 1]; // Sin[n * phi]
+//   double cos_phi_vec[n + 1]; // Cos[n * phi]
+//   sin_phi_vec[0] = 1.0;
+//   cos_phi_vec[0] = 1.0;
+//   sin_phi_vec[1] = 2.0 * cos_phi;
+//   cos_phi_vec[1] = cos_phi;
 
-  for (int i = 2; i <= n; i++) {
-    sin_phi_vec[i] = 2. * cos_phi * sin_phi_vec[i - 1] - sin_phi_vec[i - 2];
-    cos_phi_vec[i] = 2. * cos_phi * cos_phi_vec[i - 1] - cos_phi_vec[i - 2];
+//   for (int i = 2; i <= n; i++) {
+//     sin_phi_vec[i] = 2. * cos_phi * sin_phi_vec[i - 1] - sin_phi_vec[i - 2];
+//     cos_phi_vec[i] = 2. * cos_phi * cos_phi_vec[i - 1] - cos_phi_vec[i - 2];
+//   }
+
+//   for (int i = 0; i <= n; i++) {
+//     sin_phi_vec[i] *=  sin_phi;
+//   }
+
+//   // ===========================================================================
+//   // Calculate R_pq(rho)
+//   double zn_mat[n + 1][n + 1]; // Matrix forms of the coefficients which are
+//                                // easier to work with
+
+//   // Fill the main diagonal first (Eq 3.9 in Chong)
+//   for (int p = 0; p <= n; p++) {
+//     zn_mat[p][p] = std::pow(rho, p);
+//   }
+
+//   // Fill the 2nd diagonal (Eq 3.10 in Chong)
+//   for (int q = 0; q <= n - 2; q++) {
+//     zn_mat[q][q+2] = (q + 2) * zn_mat[q+2][q+2] - (q + 1) * zn_mat[q][q];
+//   }
+
+//   // Fill in the rest of the values using the original results (Eq. 3.8 in Chong)
+//   for (int p = 4; p <= n; p++) {
+//     double k2 = 2 * p * (p - 1) * (p - 2);
+//     for (int q = p - 4; q >= 0; q -= 2) {
+//       double k1 = ((p + q) * (p - q) * (p - 2)) / 2.;
+//       double k3 = -q * q * (p - 1) - p * (p - 1) * (p - 2);
+//       double k4 = (-p * (p + q - 2) * (p - q - 2)) / 2.;
+//       zn_mat[q][p] =
+//         ((k2 * rho * rho + k3) * zn_mat[q][p-2] + k4 * zn_mat[q][p-4]) / k1;
+//     }
+//   }
+
+//   // Roll into a single vector for easier computation later
+//   // The vector is ordered (0,0), (1,-1), (1,1), (2,-2), (2,0),
+//   // (2, 2), ....   in (n,m) indices
+//   // Note that the cos and sin vectors are offset by one
+//   // sin_phi_vec = [sin(x), sin(2x), sin(3x) ...]
+//   // cos_phi_vec = [1.0, cos(x), cos(2x)... ]
+//   int i = 0;
+//   for (int p = 0; p <= n; p++) {
+//     for (int q = -p; q <= p; q += 2) {
+//       if (q < 0) {
+//         zn[i] = zn_mat[std::abs(q)][p] * sin_phi_vec[std::abs(q) - 1];
+//       } else if (q == 0) {
+//         zn[i] = zn_mat[q][p];
+//       } else {
+//         zn[i] = zn_mat[q][p] * cos_phi_vec[q];
+//       }
+//       i++;
+//     }
+//   }
+
+// }
+
+//  Auxiliary Bessel functions for N=0, N=1
+double BESSI0(double X) {
+  double Y,P1,P2,P3,P4,P5,P6,P7,Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8,Q9,AX,BX;
+  P1=1.0; P2=3.5156229; P3=3.0899424; P4=1.2067492;
+  P5=0.2659732; P6=0.360768e-1; P7=0.45813e-2;
+  Q1=0.39894228; Q2=0.1328592e-1; Q3=0.225319e-2;
+  Q4=-0.157565e-2; Q5=0.916281e-2; Q6=-0.2057706e-1;
+  Q7=0.2635537e-1; Q8=-0.1647633e-1; Q9=0.392377e-2;
+  if (fabs(X) < 3.75) {
+    Y=(X/3.75)*(X/3.75);
+    return (P1+Y*(P2+Y*(P3+Y*(P4+Y*(P5+Y*(P6+Y*P7))))));
   }
-
-  for (int i = 0; i <= n; i++) {
-    sin_phi_vec[i] *=  sin_phi;
+  else {
+    AX=fabs(X);
+    Y=3.75/AX;
+    BX=exp(AX)/sqrt(AX);
+    AX=Q1+Y*(Q2+Y*(Q3+Y*(Q4+Y*(Q5+Y*(Q6+Y*(Q7+Y*(Q8+Y*Q9)))))));
+    return (AX*BX);
   }
-
-  // ===========================================================================
-  // Calculate R_pq(rho)
-  double zn_mat[n + 1][n + 1]; // Matrix forms of the coefficients which are
-                               // easier to work with
-
-  // Fill the main diagonal first (Eq 3.9 in Chong)
-  for (int p = 0; p <= n; p++) {
-    zn_mat[p][p] = std::pow(rho, p);
-  }
-
-  // Fill the 2nd diagonal (Eq 3.10 in Chong)
-  for (int q = 0; q <= n - 2; q++) {
-    zn_mat[q][q+2] = (q + 2) * zn_mat[q+2][q+2] - (q + 1) * zn_mat[q][q];
-  }
-
-  // Fill in the rest of the values using the original results (Eq. 3.8 in Chong)
-  for (int p = 4; p <= n; p++) {
-    double k2 = 2 * p * (p - 1) * (p - 2);
-    for (int q = p - 4; q >= 0; q -= 2) {
-      double k1 = ((p + q) * (p - q) * (p - 2)) / 2.;
-      double k3 = -q * q * (p - 1) - p * (p - 1) * (p - 2);
-      double k4 = (-p * (p + q - 2) * (p - q - 2)) / 2.;
-      zn_mat[q][p] =
-        ((k2 * rho * rho + k3) * zn_mat[q][p-2] + k4 * zn_mat[q][p-4]) / k1;
-    }
-  }
-
-  // Roll into a single vector for easier computation later
-  // The vector is ordered (0,0), (1,-1), (1,1), (2,-2), (2,0),
-  // (2, 2), ....   in (n,m) indices
-  // Note that the cos and sin vectors are offset by one
-  // sin_phi_vec = [sin(x), sin(2x), sin(3x) ...]
-  // cos_phi_vec = [1.0, cos(x), cos(2x)... ]
-  int i = 0;
-  for (int p = 0; p <= n; p++) {
-    for (int q = -p; q <= p; q += 2) {
-      if (q < 0) {
-        zn[i] = zn_mat[std::abs(q)][p] * sin_phi_vec[std::abs(q) - 1];
-      } else if (q == 0) {
-        zn[i] = zn_mat[q][p];
-      } else {
-        zn[i] = zn_mat[q][p] * cos_phi_vec[q];
-      }
-      i++;
-    }
-  }
-
 }
 
+double BESSI1(double X) {
+  double Y,P1,P2,P3,P4,P5,P6,P7,Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8,Q9,AX,BX;
+  P1=0.5; P2=0.87890594; P3=0.51498869; P4=0.15084934;
+  P5=0.2658733e-1; P6=0.301532e-2; P7=0.32411e-3;
+  Q1=0.39894228; Q2=-0.3988024e-1; Q3=-0.362018e-2;
+  Q4=0.163801e-2; Q5=-0.1031555e-1; Q6=0.2282967e-1;
+  Q7=-0.2895312e-1; Q8=0.1787654e-1; Q9=-0.420059e-2;
+  if (fabs(X) < 3.75) {
+    Y=(X/3.75)*(X/3.75);
+    return(X*(P1+Y*(P2+Y*(P3+Y*(P4+Y*(P5+Y*(P6+Y*P7)))))));
+  }
+  else {
+    AX=fabs(X);
+    Y=3.75/AX;
+    BX=exp(AX)/sqrt(AX);
+    AX=Q1+Y*(Q2+Y*(Q3+Y*(Q4+Y*(Q5+Y*(Q6+Y*(Q7+Y*(Q8+Y*Q9)))))));
+    return (AX*BX);
+  }
+}
+
+double BESSI(int N, double X) {
+/*----------------------------------------------------------------------
+!     This subroutine calculates the first kind modified Bessel function
+!     of integer order N, for any REAL X. We use here the classical
+!     recursion formula, when X > N. For X < N, the Miller's algorithm
+!     is used to avoid overflows. 
+!     REFERENCE:
+!     C.W.CLENSHAW, CHEBYSHEV SERIES FOR MATHEMATICAL FUNCTIONS,
+!     MATHEMATICAL TABLES, VOL.5, 1962.
+------------------------------------------------------------------------*/
+
+  int IACC = 40; 
+  double BIGNO = 1e10, BIGNI = 1e-10;
+  double TOX, BIM, BI, BIP, BSI;
+  int J, M;
+
+  if (N==0)  return (BESSI0(X));
+  if (N==1)  return (BESSI1(X));
+  if (X==0.0) return 0.0;
+
+  TOX = 2.0/X;
+  BIP = 0.0;
+  BI  = 1.0;
+  BSI = 0.0;
+  M = (int) (2*((N+floor(sqrt(IACC*N)))));
+  for (J = M; J>0; J--) {
+    BIM = BIP+J*TOX*BI;
+    BIP = BI;
+    BI  = BIM;
+    if (fabs(BI) > BIGNO) {
+      BI  = BI*BIGNI;
+      BIP = BIP*BIGNI;
+      BSI = BSI*BIGNI;
+    }
+    if (J==N)  BSI = BIP;
+  }
+  return (BSI*BESSI0(X)/BI);
+}
+
+void calc_zn_c(int n, double rho, double phi, double zn[]){
+  for (int i = 0; i <= n ; i++){
+      zn[i] = BESSI(i,rho);
+  }
+}
 
 void rotate_angle_c(double uvw[3], double mu, double* phi) {
   // Copy original directional cosines

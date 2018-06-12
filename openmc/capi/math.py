@@ -149,7 +149,7 @@ def calc_zn(n, rho, phi):
 
     """
 
-    num_bins = ((n + 1) * (n + 2)) // 2
+    num_bins = n+1
     zn = np.zeros(num_bins, dtype=np.float64)
     _dll.calc_zn_c(n, rho, phi, zn)
     return zn

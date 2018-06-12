@@ -180,6 +180,10 @@ class Tally(IDManagerMixin):
 
     @property
     def num_filter_bins(self):
+        # # print(self_filter)
+        # for f in self.filters:
+        #     print(f)
+        #     print("number of bins",f.num_bins)
         return reduce(operator.mul, (f.num_bins for f in self.filters), 1)
 
     @property
@@ -219,7 +223,7 @@ class Tally(IDManagerMixin):
             data = f['tallies/tally {0}/results'.format(self.id)].value
             sum = data[:, :, 0]
             sum_sq = data[:, :, 1]
-
+            # print(sum)
             # Reshape the results arrays
             sum = np.reshape(sum, self.shape)
             sum_sq = np.reshape(sum_sq, self.shape)

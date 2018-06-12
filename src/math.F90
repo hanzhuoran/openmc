@@ -67,7 +67,7 @@ module math
       integer(C_INT), value, intent(in) :: n
       real(C_DOUBLE), value, intent(in) :: rho
       real(C_DOUBLE), value, intent(in) :: phi
-      real(C_DOUBLE), intent(out) :: zn(((n + 1) * (n + 2)) / 2)
+      real(C_DOUBLE), intent(out) :: zn((n + 1))
     end subroutine calc_zn
 
     subroutine rotate_angle_c_intfc(uvw, mu, phi) bind(C, name='rotate_angle_c')
