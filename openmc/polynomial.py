@@ -3,7 +3,7 @@ import openmc
 import openmc.capi as capi
 
 
-def legendre_from_expcoef(coef, domain= (-1,1)):
+def legendre_from_expcoef(coef, domain=(-1, 1)):
     """Return a Legendre series object based on expansion coefficients.
 
     Given a list of coefficients from FET tally and a array of down, return
@@ -47,8 +47,8 @@ class ZernikeRadial(Polynomial):
         A list of coefficients of each term in radial only Zernike polynomials
     radius : float
         Domain of Zernike polynomials to be applied on. Default is 1.
-    r : float
-        Position to be evaluated, normalized on radius [0,1]
+    r : Iterable of float
+        A list of positions to be evaluated, normalized on radius [0,1]
 
     Attributes
     ----------
@@ -73,5 +73,5 @@ class ZernikeRadial(Polynomial):
         return self._order
 
     def __call__(self, r):
-        zn_rad = capi.calc_zn_rad(self.order, r)
-        return np.sum(self._norm_coef * zn_rad)
+        return [np.sum(self._norm_coef *
+                       openmc.capi.calc_zn_rad(self.order, i)) for i in r]
