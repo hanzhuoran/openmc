@@ -24,6 +24,6 @@ def test_zernike_radial():
 
     ref_vals = np.sum(norm_coeff * raw_zn)
 
-    test_vals = zn_rad(rho)
+    test_vals = zn_rad(rho)[0]
 
     assert ref_vals == test_vals

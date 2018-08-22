@@ -1,6 +1,7 @@
 import numpy as np
 import openmc
 import openmc.capi as capi
+from collections import Iterable
 
 
 def legendre_from_expcoef(coef, domain=(-1, 1)):
@@ -47,7 +48,7 @@ class ZernikeRadial(Polynomial):
         A list of coefficients of each term in radial only Zernike polynomials
     radius : float
         Domain of Zernike polynomials to be applied on. Default is 1.
-    r : Iterable of float
+    r : float or iterable of float
         A list of positions to be evaluated, normalized on radius [0,1]
 
     Attributes
@@ -56,7 +57,7 @@ class ZernikeRadial(Polynomial):
         The maximum (even) order of Zernike polynomials.
     radius : float
         Domain of Zernike polynomials to be applied on. Default is 1.
-    norm_coef : iterable of float
+    norm_coef : Iterable of float
         The list of coefficients of each term in the polynomials after
         normailization.
 
@@ -73,5 +74,7 @@ class ZernikeRadial(Polynomial):
         return self._order
 
     def __call__(self, r):
+        if not isinstance(r, Iterable): 
+            r = [r]
         return [np.sum(self._norm_coef *
                        openmc.capi.calc_zn_rad(self.order, i)) for i in r]
