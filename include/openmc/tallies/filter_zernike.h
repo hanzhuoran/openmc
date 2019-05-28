@@ -87,5 +87,22 @@ public:
   void set_order(int order) override;
 };
 
+//==============================================================================
+//! Gives even order new Zernike radial moments of a particle's position
+//==============================================================================
+
+class NewZernikeRadialFilter : public ZernikeFilter
+{
+public:
+  std::string type() const override {return "newzernikeradial";}
+
+  void get_all_bins(const Particle* p, int estimator, FilterMatch& match)
+  const override;
+
+  std::string text_label(int bin) const override;
+
+  void set_order(int order) override;
+};
+
 } // namespace openmc
 #endif // OPENMC_TALLIES_FILTER_ZERNIKE_H

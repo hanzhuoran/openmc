@@ -119,6 +119,42 @@ ZernikeRadialFilter::set_order(int order)
 }
 
 //==============================================================================
+// NewZernikeRadialFilter implementation
+//==============================================================================
+
+void
+NewZernikeRadialFilter::get_all_bins(const Particle* p, int estimator,
+                                  FilterMatch& match) const
+{
+  // Determine the normalized radius coordinate.
+  double x = p->r().x - x_;
+  double y = p->r().y - y_;
+  double r = std::sqrt(x*x + y*y) / r_;
+
+  if (r <= 1.0) {
+    // Compute and return the Zernike weights.
+    double zn[n_bins_];
+    calc_new_zn_rad(order_, r, zn);
+    for (int i = 0; i < n_bins_; i++) {
+      match.bins_.push_back(i);
+      match.weights_.push_back(zn[i]);
+    }
+  }
+}
+
+std::string
+NewZernikeRadialFilter::text_label(int bin) const
+{
+  return "New Zernike expansion, Z" + std::to_string(2*bin) + ",0";
+}
+
+void
+NewZernikeRadialFilter::set_order(int order)
+{
+  order_ = order;
+  n_bins_ = order / 2 + 1;
+}
+//==============================================================================
 // C-API functions
 //==============================================================================
 
