@@ -629,11 +629,20 @@ void calc_zn_rad(int n, double rho, double zn_rad[]) {
   }
 }
 
+
+void calc_exp(int n, double exponent, double r, double exp_array[]) {
+  // Fill out exp array
+  for (int index = 0; index <= n; index++) {
+    exp_array[index] = std::exp(index * std::pow(rho, exponent))
+  }
+}
+
+
 void calc_new_zn_rad(int n, double rho, double zn_rad[]) {
   // Calculate R_p0(rho) as Zn_p0(rho)
   // Set up the array of the coefficients
 
-  double rhosq = rho
+  double rhosq = rho*rho;
   double q = 0;
 
   // R_00 is always 1

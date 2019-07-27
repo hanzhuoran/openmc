@@ -28,6 +28,7 @@
 #include "openmc/tallies/filter_surface.h"
 #include "openmc/tallies/filter_universe.h"
 #include "openmc/tallies/filter_zernike.h"
+#include "openmc/tallies/filter_exponential.h"
 
 // explicit template instantiation definition
 template class std::vector<openmc::FilterMatch>;
@@ -138,6 +139,8 @@ Filter* Filter::create(const std::string& type, int32_t id)
     model::tally_filters.push_back(std::make_unique<ZernikeRadialFilter>());
   } else if (type == "newzernikeradial") {
     model::tally_filters.push_back(std::make_unique<NewZernikeRadialFilter>());
+  } else if (type == "exponential") {
+    model::tally_filters.push_back(std::make_unique<ExponentialFilter>());
   } else {
     throw std::runtime_error{"Unknown filter type: " + type};
   }

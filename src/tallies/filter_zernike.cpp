@@ -130,11 +130,12 @@ NewZernikeRadialFilter::get_all_bins(const Particle* p, int estimator,
   double x = p->r().x - x_;
   double y = p->r().y - y_;
   double r = std::sqrt(x*x + y*y) / r_;
+  double t = r*r;
 
   if (r <= 1.0) {
     // Compute and return the Zernike weights.
     double zn[n_bins_];
-    calc_new_zn_rad(order_, r, zn);
+    calc_zn_rad(order_, t, zn);
     for (int i = 0; i < n_bins_; i++) {
       match.bins_.push_back(i);
       match.weights_.push_back(zn[i]);

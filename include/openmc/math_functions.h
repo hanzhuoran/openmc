@@ -119,6 +119,45 @@ extern "C" void calc_zn(int n, double rho, double phi, double zn[]);
 extern "C" void calc_zn_rad(int n, double rho, double zn_rad[]);
 
 //==============================================================================
+//! Calculate only the even radial components of n-th order modified Zernike
+//! polynomial moment with azimuthal dependency m = 0 for a given angle
+//! (rho, theta) location on the unit disk.
+//!
+//! Since m = 0, n could only be even orders. Z_q0 = R_q0
+//!
+//! This procedure uses the modified Kintner's method for calculating Zernike
+//! polynomials as outlined in Chong, C. W., Raveendran, P., & Mukundan,
+//! R. (2003). A comparative analysis of algorithms for fast computation of
+//! Zernike moments. Pattern Recognition, 36(3), 731-742.
+//! The normalization of the polynomials is such that the integral of Z_pq^2
+//! over the unit disk is exactly pi.
+//! Nota that we use r' = r^2 to flatten the distribution
+//!
+//! \param n       The maximum order requested
+//! \param rho     The radial parameter to specify location on the unit disk
+//! \param phi     The angle parameter to specify location on the unit disk
+//! \param zn_rad  The requested moments of order 0 to n (inclusive)
+//!   evaluated at rho and phi when m = 0.
+//==============================================================================
+
+extern "C" void calc_new_zn_rad(int n, double rho, double zn_rad[]);
+
+//==============================================================================
+//! Calculate n-th order Exponential basis set with a given exponent at radial
+//! location (rho) on the unit disk. An explicit expression at order n is
+//! exp(n*rho^exponent)
+//! 
+//! The transformation on physical doamin [0,R] is post processed.
+//!
+//! \param n        The maximum order requested
+//! \param exponent The self-defined expoenent
+//! \param rho      The radial parameter to specify location on the unit disk
+//! \param exp      The requested moments of exponential basis
+//==============================================================================
+
+extern "C" void calc_exp(int n, double exponent, double r, double exp[]);
+
+//==============================================================================
 //! Rotate the direction cosines through a polar angle whose cosine is mu and
 //! through an azimuthal angle sampled uniformly.
 //!
