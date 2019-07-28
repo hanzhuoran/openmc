@@ -630,10 +630,10 @@ void calc_zn_rad(int n, double rho, double zn_rad[]) {
 }
 
 
-void calc_exp(int n, double exponent, double r, double exp_array[]) {
+void calc_exp(int n, double exponent, double rho, double exp_array[]) {
   // Fill out exp array
   for (int index = 0; index <= n; index++) {
-    exp_array[index] = std::exp(index * std::pow(rho, exponent))
+    exp_array[index] = std::exp(index * std::pow(rho, exponent)); 
   }
 }
 
