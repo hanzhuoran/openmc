@@ -27,8 +27,6 @@ public:
 
   std::string text_label(int bin) const override;
 
-  int order() const {return order_;}
-
   //! Cartesian x coordinate for the origin of this expansion.
   double x_;
 
@@ -38,7 +36,6 @@ public:
   //! Maximum radius from the origin covered by this expansion.
   double r_;
 
-protected:
   int order_;
 
   double exponent_;

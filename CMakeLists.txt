@@ -255,6 +255,7 @@ list(APPEND libopenmc_SOURCES
   src/tallies/filter_surface.cpp
   src/tallies/filter_universe.cpp
   src/tallies/filter_zernike.cpp
+  src/tallies/filter_exponential.cpp
   src/tallies/tally.cpp
   src/tallies/tally_scoring.cpp
   src/tallies/trigger.cpp
