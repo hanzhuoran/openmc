@@ -20,7 +20,7 @@ __all__ = ['Filter', 'AzimuthalFilter', 'CellFilter',
            'EnergyFunctionFilter', 'LegendreFilter', 'MaterialFilter', 'MeshFilter',
            'MeshSurfaceFilter', 'MuFilter', 'PolarFilter', 'SphericalHarmonicsFilter',
            'SpatialLegendreFilter', 'SurfaceFilter',
-           'UniverseFilter', 'ZernikeFilter', 'ZernikeRadialFilter', 'filters']
+           'UniverseFilter', 'ZernikeFilter', 'ZernikeRadialFilter', 'NewZernikeRadialFilter', 'ExponentialFilter', 'filters']
 
 # Tally functions
 _dll.openmc_cell_filter_get_bins.argtypes = [
@@ -104,6 +104,19 @@ _dll.openmc_zernike_filter_get_order.errcheck = _error_handler
 _dll.openmc_zernike_filter_set_order.argtypes = [c_int32, c_int]
 _dll.openmc_zernike_filter_set_order.restype = c_int
 _dll.openmc_zernike_filter_set_order.errcheck = _error_handler
+_dll.openmc_exponential_filter_get_order.argtypes = [c_int32, POINTER(c_int)]
+_dll.openmc_exponential_filter_get_order.restype = c_int
+_dll.openmc_exponential_filter_get_order.errcheck = _error_handler
+_dll.openmc_exponential_filter_set_order.argtypes = [c_int32, c_int]
+_dll.openmc_exponential_filter_set_order.restype = c_int
+_dll.openmc_exponential_filter_set_order.errcheck = _error_handler
+_dll.openmc_exponential_filter_get_exponent.argtypes = [c_int32, 
+                                                        POINTER(c_double)]
+_dll.openmc_exponential_filter_get_exponent.restype = c_int
+_dll.openmc_exponential_filter_get_exponent.errcheck = _error_handler
+_dll.openmc_exponential_filter_set_exponent.argtypes = [c_int32, c_double]
+_dll.openmc_exponential_filter_set_exponent.restype = c_int
+_dll.openmc_exponential_filter_set_exponent.errcheck = _error_handler
 _dll.tally_filters_size.restype = c_size_t
 
 
@@ -413,6 +426,39 @@ class ZernikeRadialFilter(ZernikeFilter):
     filter_type = 'zernikeradial'
 
 
+class NewZernikeRadialFilter(ZernikeFilter):
+    filter_type = 'newzernikeradial'
+
+
+class ExponentialFilter(Filter):
+    filter_type = 'exponential'
+
+    def __init__(self, order=None, uid=None, new=True, index=None):
+        super().__init__(uid, new, index)
+        if order is not None:
+            self.order = order
+
+    @property
+    def order(self):
+        temp_order = c_int()
+        _dll.openmc_exponential_filter_get_order(self._index, temp_order)
+        return temp_order.value
+
+    @order.setter
+    def order(self, order):
+        _dll.openmc_exponential_filter_set_order(self._index, order)
+
+    @property
+    def order(self):
+        temp_exponent = c_double()
+        _dll.openmc_exponential_filter_get_exponent(self._index, temp_exponent)
+        return temp_exponent.value
+
+    @order.setter
+    def order(self, exponent):
+        _dll.openmc_exponential_filter_set_exponent(self._index, exponent)
+
+
 _FILTER_TYPE_MAP = {
     'azimuthal': AzimuthalFilter,
     'cell': CellFilter,
@@ -434,7 +480,9 @@ _FILTER_TYPE_MAP = {
     'surface': SurfaceFilter,
     'universe': UniverseFilter,
     'zernike': ZernikeFilter,
-    'zernikeradial': ZernikeRadialFilter
+    'zernikeradial': ZernikeRadialFilter,
+    'newzernikeradial': NewZernikeRadialFilter,
+    'exponential': ExponentialFilter
 }
 
 

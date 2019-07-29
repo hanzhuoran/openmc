@@ -526,3 +526,207 @@ class ZernikeRadialFilter(ZernikeFilter):
     def order(self, order):
         ExpansionFilter.order.__set__(self, order)
         self.bins = ['Z{},0'.format(n) for n in range(0, order+1, 2)]
+
+
+class NewZernikeRadialFilter(ZernikeFilter):
+    r"""Score the :math:`m = 0` (radial variation only) Zernike moments up to
+    specified order.
+
+    The Zernike polynomials are defined the same as in :class:`ZernikeFilter`.
+
+    .. math::
+
+        Z_n^{0}(\rho, \theta) = R_n^{0}(\rho)
+
+    where the radial polynomials are
+
+    .. math::
+        R_n^{0}(\rho) = \sum\limits_{k=0}^{n/2} \frac{(-1)^k (n-k)!}{k! ((
+        \frac{n}{2} - k)!)^{2}} \rho^{n-2k}.
+
+    With this definition, the integral of :math:`(Z_n^0)^2` over the unit disk
+    is :math:`\frac{\pi}{n+1}`.
+
+    If there is only radial dependency, the polynomials are integrated over
+    the azimuthal angles. The only terms left are :math:`Z_n^{0}(\rho, \theta)
+    = R_n^{0}(\rho)`. Note that :math:`n` could only be even orders.
+    Therefore, for a radial Zernike polynomials up to order of :math:`n`,
+    there are :math:`\frac{n}{2} + 1` terms in total. The indexing is from the
+    lowest even order (0) to highest even order.
+
+    Parameters
+    ----------
+    order : int
+        Maximum radial Zernike polynomial order
+    x : float
+        x-coordinate of center of circle for normalization
+    y : float
+        y-coordinate of center of circle for normalization
+    r : int or None
+        Radius of circle for normalization
+
+    Attributes
+    ----------
+    order : int
+        Maximum radial Zernike polynomial order
+    x : float
+        x-coordinate of center of circle for normalization
+    y : float
+        y-coordinate of center of circle for normalization
+    r : int or None
+        Radius of circle for normalization
+    id : int
+        Unique identifier for the filter
+    num_bins : int
+        The number of filter bins
+
+    """
+
+    @ExpansionFilter.order.setter
+    def order(self, order):
+        ExpansionFilter.order.__set__(self, order)
+        self.bins = ['NZ{},0'.format(n) for n in range(0, order+1, 2)]
+
+
+class ExponentialFilter(ExpansionFilter):
+    r"""Score Exponential expansion moments in space up to specified order.
+
+    This filter allows scores to be multiplied by exponential series with a 
+    user-specified exponent of the particle's radial position on a unit disk
+    up to a user-specified order. The expression is given as
+
+    .. math::
+        E_n(\rho) = \exp(n\rho^{exponent})
+
+    Note that this basis set is not orthogonal. A post orthogonalization shall 
+    be performed in the reconstruction process. A matrix of size 
+    :math:`(n+1)\times(n+1)` with :math:`(i,j)· entry as inner product :math:`<E_i, E_j>` on unit disk.
+
+    Parameters
+    ----------
+    order : int
+        Maximum Zernike polynomial order
+    exponent : float
+        Specified exponent on the radial postion
+    x : float
+        x-coordinate of center of circle for normalization
+    y : float
+        y-coordinate of center of circle for normalization
+    r : int or None
+        Radius of circle for normalization
+
+    Attributes
+    ----------
+    order : int
+        Maximum Zernike polynomial order
+    x : float
+        x-coordinate of center of circle for normalization
+    y : float
+        y-coordinate of center of circle for normalization
+    r : int or None
+        Radius of circle for normalization
+    id : int
+        Unique identifier for the filter
+    num_bins : int
+        The number of filter bins
+
+    """
+
+    def __init__(self, order, exponent=1.0, x=0.0, y=0.0, r=1.0, filter_id=None):
+        super().__init__(order, filter_id)
+        self.exponent = exponent
+        self.x = x
+        self.y = y
+        self.r = r
+
+    def __hash__(self):
+        string = type(self).__name__ + '\n'
+        string += '{: <16}=\t{}\n'.format('\tOrder', self.order)
+        string += '{: <16}=\t{}\n'.format('\tExponent', self.exponent)
+        string += '{: <16}=\t{}\n'.format('\tX', self.x)
+        string += '{: <16}=\t{}\n'.format('\tY', self.y)
+        string += '{: <16}=\t{}\n'.format('\tR', self.r)
+        return hash(string)
+
+    def __repr__(self):
+        string = type(self).__name__ + '\n'
+        string += '{: <16}=\t{}\n'.format('\tOrder', self.order)
+        string += '{: <16}=\t{}\n'.format('\tExponent', self.exponent)
+        string += '{: <16}=\t{}\n'.format('\tID', self.id)
+        return string
+
+    @ExpansionFilter.order.setter
+    def order(self, order):
+        ExpansionFilter.order.__set__(self, order)
+        self.bins = ['E{}'.format(i) for i in range(order + 1)]
+
+    @property
+    def exponent(self):
+        return self._exponent
+
+    @exponent.setter
+    def exponent(self, exponent):
+        cv.check_type('exponent', exponent, Real)
+        self._exponent = exponent
+
+    @property
+    def x(self):
+        return self._x
+
+    @x.setter
+    def x(self, x):
+        cv.check_type('x', x, Real)
+        self._x = x
+
+    @property
+    def y(self):
+        return self._y
+
+    @y.setter
+    def y(self, y):
+        cv.check_type('y', y, Real)
+        self._y = y
+
+    @property
+    def r(self):
+        return self._r
+
+    @r.setter
+    def r(self, r):
+        cv.check_type('r', r, Real)
+        self._r = r
+
+    @classmethod
+    def from_hdf5(cls, group, **kwargs):
+        if group['type'][()].decode() != cls.short_name.lower():
+            raise ValueError("Expected HDF5 data for filter type '"
+                             + cls.short_name.lower() + "' but got '"
+                             + group['type'][()].decode() + " instead")
+
+        filter_id = int(group.name.split('/')[-1].lstrip('filter '))
+        order = group['order'][()]
+        exponent = group['exponent'][()]
+        x, y, r = group['x'][()], group['y'][()], group['r'][()]
+
+        return cls(order, exponent, x, y, r, filter_id)
+
+    def to_xml_element(self):
+        """Return XML Element representing the filter.
+
+        Returns
+        -------
+        element : xml.etree.ElementTree.Element
+            XML element containing Zernike filter data
+
+        """
+        element = super().to_xml_element()
+        subelement = ET.SubElement(element, 'exponent')
+        subelement.text = str(self.exponent)
+        subelement = ET.SubElement(element, 'x')
+        subelement.text = str(self.x)
+        subelement = ET.SubElement(element, 'y')
+        subelement.text = str(self.y)
+        subelement = ET.SubElement(element, 'r')
+        subelement.text = str(self.r)
+
+        return element

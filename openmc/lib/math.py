@@ -24,6 +24,12 @@ _dll.calc_zn.argtypes = [c_int, c_double, c_double, ndpointer(c_double)]
 _dll.calc_zn_rad.restype = None
 _dll.calc_zn_rad.argtypes = [c_int, c_double, ndpointer(c_double)]
 
+_dll.calc_new_zn_rad.restype = None
+_dll.calc_new_zn_rad.argtypes = [c_int, c_double, ndpointer(c_double)]
+
+_dll.calc_exp.restype = None
+_dll.calc_exp.argtypes = [c_int, c_double, c_double, ndpointer(c_double)]
+
 _dll.rotate_angle_c.restype = None
 _dll.rotate_angle_c.argtypes = [ndpointer(c_double), c_double,
                                 POINTER(c_double)]
@@ -149,7 +155,7 @@ def calc_zn(n, rho, phi):
     Returns
     -------
     numpy.ndarray
-        Corresponding resulting list of coefficients
+        Corresponding list of expansion values
 
     """
 
@@ -175,7 +181,7 @@ def calc_zn_rad(n, rho):
     Returns
     -------
     numpy.ndarray
-        Corresponding resulting list of coefficients
+        Corresponding list of expansion values
 
     """
 
@@ -183,6 +189,58 @@ def calc_zn_rad(n, rho):
     zn_rad = np.zeros(num_bins, dtype=np.float64)
     _dll.calc_zn_rad(n, rho, zn_rad)
     return zn_rad
+
+
+def calc_new_zn_rad(n, rho):
+    """ Calculate the even orders in n-th order modified Zernike polynomial
+    moment with no azimuthal dependency (m=0) for a given radial location in
+    the unit disk. The normalization of the polynomials is such that the
+    integral of Z_pq*Z_pq over the unit disk is exactly pi.
+
+    Parameters
+    ----------
+    n : int
+        Maximum order
+    rho : float
+        Radial location in the unit disk
+
+    Returns
+    -------
+    numpy.ndarray
+        Corresponding list of expansion values
+
+    """
+
+    num_bins = n // 2 + 1
+    new_zn_rad = np.zeros(num_bins, dtype=np.float64)
+    _dll.calc_new_zn_rad(n, rho, new_zn_rad)
+    return new_zn_rad
+
+
+def calc_exp(n, exponent, rho):
+    """ Calculate the radial Exponential moment with exponent for a given 
+    radial location in the unit disk. 
+
+    Parameters
+    ----------
+    n : int
+        Maximum order
+    exponent : float
+        Exponent on radial position
+    rho : float
+        Radial location in the unit disk
+
+    Returns
+    -------
+    numpy.ndarray
+        Corresponding list of expansion values
+
+    """
+
+    num_bins = n + 1
+    exp_array = np.zeros(num_bins, dtype=np.float64)
+    _dll.calc_exp(n, exponent, rho, exp_array)
+    return exp_array
 
 
 def rotate_angle(uvw0, mu, phi=None):

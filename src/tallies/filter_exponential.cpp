@@ -105,7 +105,7 @@ openmc_exponential_filter_get_order(int32_t index, int* order)
 }
 
 extern "C" int
-openmc_exponential_filter_get_exponent(int32_t index, int* exponent)
+openmc_exponential_filter_get_exponent(int32_t index, double* exponent)
 {
   // Check the filter.
   auto check_result = check_exponential_filter(index);
@@ -151,7 +151,7 @@ openmc_exponential_filter_set_order(int32_t index, int order)
 }
 
 extern "C" int
-openmc_exponential_filter_set_exponent(int32_t index, int exponent)
+openmc_exponential_filter_set_exponent(int32_t index, double exponent)
 {
   // Check the filter.
   auto check_result = check_exponential_filter(index);
