@@ -14,9 +14,14 @@ namespace openmc {
 class ExponentialFilter : public Filter
 {
 public:
-  std::string type() const override {return "exponential";}
+  //----------------------------------------------------------------------------
+  // Constructors, destructors
 
   ~ExponentialFilter() = default;
+
+  //----------------------------------------------------------------------------
+  // Methods
+  std::string type() const override {return "exponential";}
 
   void from_xml(pugi::xml_node node) override;
 
@@ -27,6 +32,28 @@ public:
 
   std::string text_label(int bin) const override;
 
+  //----------------------------------------------------------------------------
+  // Accessors
+
+  int order() const { return order_; }
+  virtual void set_order(int order);
+
+  double exponent() const { return exponent_; }
+  virtual void set_exponent(double exponent);
+
+  double x() const { return x_; }
+  void set_x(double x) { x_ = x; }
+
+  double y() const { return y_; }
+  void set_y(double y) { y_ = y; }
+
+  double r() const { return r_; }
+  void set_r(double r) { r_ = r; }
+
+  //----------------------------------------------------------------------------
+  // Data members
+
+protected:
   //! Cartesian x coordinate for the origin of this expansion.
   double x_;
 

@@ -638,35 +638,6 @@ void calc_exp(int n, double exponent, double rho, double exp_array[]) {
 }
 
 
-void calc_new_zn_rad(int n, double rho, double zn_rad[]) {
-  // Calculate R_p0(rho) as Zn_p0(rho)
-  // Set up the array of the coefficients
-
-  double rhosq = rho*rho;
-  double q = 0;
-
-  // R_00 is always 1
-  zn_rad[0] = 1;
-
-  // Fill in the rest of the array (Eq 3.8 and Eq 3.10 in Chong)
-  for (int p = 2; p <= n; p += 2) {
-    int index = int(p/2);
-    if (p == 2) {
-    // Setting up R_22 to calculate R_20 (Eq 3.10 in Chong)
-      double R_22 = rhosq * rhosq;
-      zn_rad[index] = 2 * R_22 - zn_rad[0];
-    } else {
-      double k1 = ((p + q) * (p - q) * (p - 2)) / 2.;
-      double k2 = 2 * p * (p - 1) * (p - 2);
-      double k3 = -q * q * (p - 1) - p * (p - 1) * (p - 2);
-      double k4 = (-p * (p + q - 2) * (p - q - 2)) / 2.;
-      zn_rad[index] =
-        ((k2 * rhosq * rhosq + k3) * zn_rad[index-1] + k4 * zn_rad[index-2]) / k1;
-    }
-  }
-}
-
-
 void rotate_angle_c(double uvw[3], double mu, const double* phi) {
   Direction u = rotate_angle({uvw}, mu, phi);
   uvw[0] = u.x;

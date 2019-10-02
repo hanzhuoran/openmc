@@ -17,13 +17,11 @@ namespace openmc {
 void
 ExponentialFilter::from_xml(pugi::xml_node node)
 {
-    order_ = std::stoi(get_node_value(node, "order"));
+    set_order(std::stoi(get_node_value(node, "order")));
     x_ = std::stod(get_node_value(node, "x"));
     y_ = std::stod(get_node_value(node, "y"));
     r_ = std::stod(get_node_value(node, "r"));
     exponent_ = std::stod(get_node_value(node, "exponent"));
-
-    n_bins_ = order_ + 1;
 }
 
 void
@@ -37,8 +35,8 @@ ExponentialFilter::get_all_bins(const Particle* p, int estimator,
 
   if (r <= 1.0) {
     // Compute and return the Exponential weights.
-    double exp[n_bins_];
-    calc_exp(order_, exponent_, r, exp);
+     std::vector<double> exp(n_bins_);
+    calc_exp(order_, exponent_, r, exp.data());
     for (int i = 0; i < n_bins_; i++) {
       match.bins_.push_back(i);
       match.weights_.push_back(exp[i]);
@@ -63,6 +61,25 @@ ExponentialFilter::text_label(int bin) const
   std::stringstream out;
   out << "Exponential expansion, EXP" << std::to_string(bin);
   return out.str();
+}
+
+void
+ExponentialFilter::set_order(int order)
+{
+  if (order < 0) {
+    throw std::invalid_argument{"Exponential order must be non-negative."};
+  }
+  order_ = order;
+  n_bins_ = order+1;
+}
+
+void
+ExponentialFilter::set_exponent(double exponent)
+{
+  if (exponent <= 0) {
+    throw std::invalid_argument{"Exponent only supports positive number."};
+  }
+  exponent_ = exponent;
 }
 
 //==============================================================================
@@ -100,7 +117,7 @@ openmc_exponential_filter_get_order(int32_t index, int* order)
   if (err) return err;
 
   // Output the order.
-  *order = filt->order_;
+  *order = filt->order();
   return 0;
 }
 
@@ -114,7 +131,7 @@ openmc_exponential_filter_get_exponent(int32_t index, double* exponent)
   if (err) return err;
 
   // Output the exponent.
-  *exponent = filt->exponent_;
+  *exponent = filt->exponent();
   return 0;
 }
 
@@ -129,9 +146,9 @@ openmc_exponential_filter_get_params(int32_t index, double* x, double* y,
   if (err) return err;
 
   // Output the params.
-  *x = filt->x_;
-  *y = filt->y_;
-  *r = filt->r_;
+  *x = filt->x();
+  *y = filt->y();
+  *r = filt->r();
   return 0;
 }
 
@@ -145,8 +162,7 @@ openmc_exponential_filter_set_order(int32_t index, int order)
   if (err) return err;
 
   // Update the filter.
-  filt->order_ = order;
-  filt->n_bins_ = order + 1;
+  filt->set_order(order);
   return 0;
 }
 
@@ -160,7 +176,7 @@ openmc_exponential_filter_set_exponent(int32_t index, double exponent)
   if (err) return err;
 
   // Update the filter.
-  filt->exponent_ = exponent;
+  filt->set_exponent(exponent);
   return 0;
 }
 
@@ -175,9 +191,9 @@ openmc_exponential_filter_set_params(int32_t index, const double* x,
   if (err) return err;
 
   // Update the filter.
-  if (x) filt->x_ = *x;
-  if (y) filt->y_ = *y;
-  if (r) filt->r_ = *r;
+  if (x) filt->set_x(*x);
+  if (y) filt->set_y(*y);
+  if (r) filt->set_r(*r);
   return 0;
 }
 
