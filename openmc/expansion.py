@@ -74,12 +74,12 @@ class ZernikeRadial(Expansion):
         return self._order
 
     def __call__(self, r):
-        import openmc.capi as capi
+        import openmc.lib as lib
         if isinstance(r, Iterable):
-            return [np.sum(self._norm_coef * capi.calc_zn_rad(self.order, r_i))
+            return [np.sum(self._norm_coef * lib.calc_zn_rad(self.order, r_i))
                     for r_i in r]
         else:
-            return np.sum(self._norm_coef * capi.calc_zn_rad(self.order, r))
+            return np.sum(self._norm_coef * lib.calc_zn_rad(self.order, r))
 
 
 class Exponential(Expansion):
@@ -118,12 +118,23 @@ class Exponential(Expansion):
         # norm_vec = (2 * np.arange(len(self.coef)) + 1) / (np.pi * radius**2)
         # self._norm_coef = norm_vec * self.coef
         inn_prod_mat = np.empty([len(coef),len(coef)])
+        in_mat = np.empty([len(coef),len(coef)])
         for i in range(len(coef)):
             for j in range(len(coef)):
                 intergrand = lambda r: np.exp((i+j)*r**exponent)*(2*np.pi*r)
                 y, err = quad(intergrand, 0, 1) 
                 inn_prod_mat[i,j] = y
-
+#               test
+                # if (i+j) != 0:
+                #     k = (i+j)*exponent
+                #     in_mat[i,j] = 2*np.pi*(np.exp(k)*(k-1)+1)/k**2
+                # else:
+                #     in_mat[i,j] = np.pi 
+                
+        # print("<<<<<inn_prod_mat<<<<<<<")
+        # print(inn_prod_mat)
+        # print(">>>>in_mat>>>>>>")
+        # print(in_mat)
         self._norm_coef = np.linalg.solve(inn_prod_mat,coef)   
 
     @property
@@ -134,14 +145,18 @@ class Exponential(Expansion):
     def exponent(self):
         return self._exponent
 
+    @property
+    def norm_coef(self):
+        return self._norm_coef
+
     def __call__(self, r):
-        import openmc.capi as capi
+        import openmc.lib as lib
         if isinstance(r, Iterable):
-            return [np.sum(self._norm_coef * capi.calc_exp(self.order, 
+            return [np.sum(self._norm_coef * lib.calc_exp(self.order, 
                 self.exponent, r_i))/(self.radius**2) for r_i in r]
 
         else:
-            return np.sum(self._norm_coef * capi.calc_exp(self.order, 
+            return np.sum(self._norm_coef * lib.calc_exp(self.order, 
                 self.exponent, r))/(self.radius**2)
 
 

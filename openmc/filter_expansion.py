@@ -528,66 +528,6 @@ class ZernikeRadialFilter(ZernikeFilter):
         self.bins = ['Z{},0'.format(n) for n in range(0, order+1, 2)]
 
 
-class NewZernikeRadialFilter(ZernikeFilter):
-    r"""Score the :math:`m = 0` (radial variation only) Zernike moments up to
-    specified order.
-
-    The Zernike polynomials are defined the same as in :class:`ZernikeFilter`.
-
-    .. math::
-
-        Z_n^{0}(\rho, \theta) = R_n^{0}(\rho)
-
-    where the radial polynomials are
-
-    .. math::
-        R_n^{0}(\rho) = \sum\limits_{k=0}^{n/2} \frac{(-1)^k (n-k)!}{k! ((
-        \frac{n}{2} - k)!)^{2}} \rho^{n-2k}.
-
-    With this definition, the integral of :math:`(Z_n^0)^2` over the unit disk
-    is :math:`\frac{\pi}{n+1}`.
-
-    If there is only radial dependency, the polynomials are integrated over
-    the azimuthal angles. The only terms left are :math:`Z_n^{0}(\rho, \theta)
-    = R_n^{0}(\rho)`. Note that :math:`n` could only be even orders.
-    Therefore, for a radial Zernike polynomials up to order of :math:`n`,
-    there are :math:`\frac{n}{2} + 1` terms in total. The indexing is from the
-    lowest even order (0) to highest even order.
-
-    Parameters
-    ----------
-    order : int
-        Maximum radial Zernike polynomial order
-    x : float
-        x-coordinate of center of circle for normalization
-    y : float
-        y-coordinate of center of circle for normalization
-    r : int or None
-        Radius of circle for normalization
-
-    Attributes
-    ----------
-    order : int
-        Maximum radial Zernike polynomial order
-    x : float
-        x-coordinate of center of circle for normalization
-    y : float
-        y-coordinate of center of circle for normalization
-    r : int or None
-        Radius of circle for normalization
-    id : int
-        Unique identifier for the filter
-    num_bins : int
-        The number of filter bins
-
-    """
-
-    @ExpansionFilter.order.setter
-    def order(self, order):
-        ExpansionFilter.order.__set__(self, order)
-        self.bins = ['NZ{},0'.format(n) for n in range(0, order+1, 2)]
-
-
 class ExponentialFilter(ExpansionFilter):
     r"""Score Exponential expansion moments in space up to specified order.
 

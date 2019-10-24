@@ -24,9 +24,6 @@ _dll.calc_zn.argtypes = [c_int, c_double, c_double, ndpointer(c_double)]
 _dll.calc_zn_rad.restype = None
 _dll.calc_zn_rad.argtypes = [c_int, c_double, ndpointer(c_double)]
 
-_dll.calc_new_zn_rad.restype = None
-_dll.calc_new_zn_rad.argtypes = [c_int, c_double, ndpointer(c_double)]
-
 _dll.calc_exp.restype = None
 _dll.calc_exp.argtypes = [c_int, c_double, c_double, ndpointer(c_double)]
 
