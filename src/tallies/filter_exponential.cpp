@@ -35,10 +35,11 @@ ExponentialFilter::get_all_bins(const Particle* p, int estimator,
 
   if (r <= 1.0) {
     // Compute and return the Exponential weights.
-     std::vector<double> exp(n_bins_);
+    std::vector<double> exp(n_bins_);
     calc_exp(order_, exponent_, r, exp.data());
     for (int i = 0; i < n_bins_; i++) {
       match.bins_.push_back(i);
+      std::cout << exp[i] << "\n";
       match.weights_.push_back(exp[i]);
     }
   }

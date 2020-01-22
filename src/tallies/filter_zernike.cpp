@@ -40,6 +40,7 @@ ZernikeFilter::get_all_bins(const Particle* p, int estimator,
     calc_zn(order_, r, theta, zn.data());
     for (int i = 0; i < n_bins_; i++) {
       match.bins_.push_back(i);
+      std::cout<< zn[i] <<"\n";
       match.weights_.push_back(zn[i]);
     }
   }
