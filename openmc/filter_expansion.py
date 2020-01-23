@@ -545,7 +545,7 @@ class ExponentialFilter(ExpansionFilter):
     Parameters
     ----------
     order : int
-        Maximum Zernike polynomial order
+        Maximum expansion order
     exponent : float
         Specified exponent on the radial postion
     x : float
@@ -558,7 +558,7 @@ class ExponentialFilter(ExpansionFilter):
     Attributes
     ----------
     order : int
-        Maximum Zernike polynomial order
+        Maximum expansion order
     x : float
         x-coordinate of center of circle for normalization
     y : float

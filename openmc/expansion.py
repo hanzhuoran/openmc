@@ -115,8 +115,6 @@ class Exponential(Expansion):
         self._order = len(coef) - 1
         self._exponent = exponent
         self.radius = radius
-        # norm_vec = (2 * np.arange(len(self.coef)) + 1) / (np.pi * radius**2)
-        # self._norm_coef = norm_vec * self.coef
         inn_prod_mat = np.empty([len(coef),len(coef)])
         in_mat = np.empty([len(coef),len(coef)])
         for i in range(len(coef)):
@@ -124,17 +122,6 @@ class Exponential(Expansion):
                 intergrand = lambda r: np.exp((i+j)*r**exponent)*(2*np.pi*r)
                 y, err = quad(intergrand, 0, 1) 
                 inn_prod_mat[i,j] = y
-#               test
-                # if (i+j) != 0:
-                #     k = (i+j)*exponent
-                #     in_mat[i,j] = 2*np.pi*(np.exp(k)*(k-1)+1)/k**2
-                # else:
-                #     in_mat[i,j] = np.pi 
-                
-        # print("<<<<<inn_prod_mat<<<<<<<")
-        # print(inn_prod_mat)
-        # print(">>>>in_mat>>>>>>")
-        # print(in_mat)
         self._norm_coef = np.linalg.solve(inn_prod_mat,coef)   
 
     @property

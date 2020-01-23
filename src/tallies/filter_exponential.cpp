@@ -39,7 +39,6 @@ ExponentialFilter::get_all_bins(const Particle* p, int estimator,
     calc_exp(order_, exponent_, r, exp.data());
     for (int i = 0; i < n_bins_; i++) {
       match.bins_.push_back(i);
-      std::cout << exp[i] << "\n";
       match.weights_.push_back(exp[i]);
     }
   }
